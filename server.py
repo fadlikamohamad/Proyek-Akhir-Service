@@ -11,8 +11,20 @@ import numpy as np
 import imageio
 import os
 from keras.preprocessing import image
+from flask_mysqldb import MySQL
+import base64
+from PIL import Image
+import io
 
 flask_app = flask.Flask(__name__)
+
+flask_app.config['MYSQL_HOST'] = 'localhost'
+flask_app.config['MYSQL_USER'] = 'root'
+flask_app.config['MYSQL_PASSWORD'] = ''
+flask_app.config['MYSQL_DB'] = 'proyek akhir'
+
+mysql = MySQL(flask_app)
+
 app = Api(app = flask_app, 
 		  version = "1.0", 
 		  title = "ML React App", 
@@ -26,7 +38,7 @@ model = app.model('Prediction params',
     					  				 	   help="Image cannot be blank")})
 
 # classifier = joblib.load('classifier.joblib')
-loaded_model = models.load_model('experiment6 with batch norm.h5')
+loaded_model = models.load_model('01052022-experiment4-withbatchnorm.h5')
 # graph = tf.get_default_graph()
 
 @name_space.route("/")
@@ -41,13 +53,25 @@ class MainClass(Resource):
 
 	@app.expect(model)		
 	def post(self):
+		name = 'Akbar Fadlika'
+		age = 22
+
 		#try: 				
 		# imagefile = request.files.get('file','')
 		imagefile = request.files['file']
 		filename = werkzeug.utils.secure_filename(imagefile.filename)
-		print("\nReceived image file name : " + imagefile.filename)
-		imagefile.save(filename)
-		img = image.load_img(filename, target_size=(100, 100))
+		print("\nReceived image file name : " + filename)
+		# imagefile.save(filename)
+		# file = open(filename, 'rb').read()
+		img = Image.open(imagefile, 'r')
+		buf = io.BytesIO()
+		img.save(buf, format='JPEG')
+		img_byte = buf.getvalue()
+		file = base64.b64encode(img_byte)
+		# img = image.load_img(filename, target_size=(100, 100))
+		
+		img = img.convert('RGB')
+		img = img.resize((100, 100), Image.NEAREST)
 		img_array = image.img_to_array(img).astype('float32')/255
 		img_array = np.expand_dims(img_array, axis=0)
 		# x = preprocess_input(x)
@@ -97,6 +121,11 @@ class MainClass(Resource):
 			"status": "Prediction made",
 			"result": result #predicted_label
 		})
+
+		cursor = mysql.connection.cursor()
+		cursor.execute(''' INSERT INTO data_prediksi(nama_file, gambar, klasifikasi) VALUES(%s,%s,%s)''', (filename, file, class_names[np.argmax(score)]))
+		mysql.connection.commit()
+		cursor.close()
 
 		response.headers.add('Access-Control-Allow-Origin', '*')
 		return response
