@@ -86,7 +86,7 @@ class MainClass(Resource):
 		class_names = ['benign', 'malignant']
 		score = tf.nn.softmax(predictions[0])
 		print(score)
-		predicted_label = str("Gambar ini kemungkinan besar tergolong {} dengan tingkat kepercayaan {:.1f}%."
+		predicted_label = str("Gambar ini kemungkinan besar tergolong {} dengan probabilitas {:.1f}%."
     		.format(class_names[np.argmax(score)], 100 * np.max(score)))
 		print('Predicted:', )
 		class1 = None
