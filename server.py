@@ -27,19 +27,17 @@ mysql = MySQL(flask_app)
 
 app = Api(app = flask_app, 
 		  version = "1.0", 
-		  title = "ML React App", 
-		  description = "Predict results using a trained model")
+		  title = "Skin Cancer Detection", 
+		  description = "Classify skin cancer using a trained CNN model")
 
-name_space = app.namespace('prediction', description='Prediction APIs')
+name_space = app.namespace('prediction', description='Classification APIs')
 
-model = app.model('Prediction params', 
+model = app.model('Classification parameters', 
 				  {'file': fields.String(required = True, 
-				  							   description="Image to predict", 
+				  							   description="Image to classify", 
     					  				 	   help="Image cannot be blank")})
 
-# classifier = joblib.load('classifier.joblib')
-loaded_model = models.load_model('01052022-experiment4-withbatchnorm.h5')
-# graph = tf.get_default_graph()
+loaded_model = models.load_model('18052022-experimentxxx-withbatchnorm-add.h5')
 
 @name_space.route("/")
 class MainClass(Resource):
@@ -53,42 +51,27 @@ class MainClass(Resource):
 
 	@app.expect(model)		
 	def post(self):
-		name = 'Akbar Fadlika'
-		age = 22
-
-		#try: 				
-		# imagefile = request.files.get('file','')
 		imagefile = request.files['file']
 		filename = werkzeug.utils.secure_filename(imagefile.filename)
 		print("\nReceived image file name : " + filename)
-		# imagefile.save(filename)
-		# file = open(filename, 'rb').read()
+		print('Predicting.....')
 		img = Image.open(imagefile, 'r')
 		buf = io.BytesIO()
 		img.save(buf, format='JPEG')
 		img_byte = buf.getvalue()
 		file = base64.b64encode(img_byte)
-		# img = image.load_img(filename, target_size=(100, 100))
-		
 		img = img.convert('RGB')
 		img = img.resize((100, 100), Image.NEAREST)
 		img_array = image.img_to_array(img).astype('float32')/255
 		img_array = np.expand_dims(img_array, axis=0)
-		# x = preprocess_input(x)
 
-		print('predicting...')
-# 		with graph.as_default():
 		predictions = loaded_model.predict(img_array)
-		print('done')
-		print('predicted', predictions)
-		# decode the results into a list of tuples (class, description, probability)
-		# (one such list for each sample in the batch)
 		class_names = ['benign', 'malignant']
-		score = tf.nn.softmax(predictions[0])
-		print(score)
+		score = predictions[0]
+		print('Probability -->', class_names[0], ':', round(100 * score[0], 1),'%,', class_names[1], ':', round(100 * score[1], 1),'%')
 		predicted_label = str("Gambar ini kemungkinan besar tergolong {} dengan probabilitas {:.1f}%."
     		.format(class_names[np.argmax(score)], 100 * np.max(score)))
-		print('Predicted:', )
+		print('Predicted class :', class_names[np.argmax(score)])
 		class1 = None
 		score1 = None
 		class2 = None
@@ -118,8 +101,8 @@ class MainClass(Resource):
 		]
 		response = jsonify({
 			"statusCode": 200,
-			"status": "Prediction made",
-			"result": result #predicted_label
+			"status": "Classification result",
+			"result": result
 		})
 
 		cursor = mysql.connection.cursor()
@@ -129,4 +112,6 @@ class MainClass(Resource):
 
 		response.headers.add('Access-Control-Allow-Origin', '*')
 		return response
-flask_app.run(host="0.0.0.0", port=os.environ.get('PORT', 5000), debug=True)
+
+if __name__ == '__main__':
+	flask_app.run(host="0.0.0.0", port=os.environ.get('PORT', 5000), debug=True)
