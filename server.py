@@ -105,13 +105,17 @@ class MainClass(Resource):
 			"result": result
 		})
 
-		cursor = mysql.connection.cursor()
-		cursor.execute(''' INSERT INTO data_prediksi(nama_file, gambar, klasifikasi) VALUES(%s,%s,%s)''', (filename, file, class_names[np.argmax(score)]))
-		mysql.connection.commit()
-		cursor.close()
+		try:
+			cursor = mysql.connection.cursor()
+			cursor.execute(''' INSERT INTO data_prediksi(nama_file, gambar, klasifikasi) VALUES(%s,%s,%s)''', (filename, file, class_names[np.argmax(score)]))
+			mysql.connection.commit()
+			cursor.close()
+			
+		except Exception:
+			print('Gagal terhubung ke database')
+			return jsonify("error")
 
-		response.headers.add('Access-Control-Allow-Origin', '*')
+		response.headers.add("Access-Control-Allow-Origin", "*")
 		return response
-
 if __name__ == '__main__':
 	flask_app.run(host="0.0.0.0", port=os.environ.get('PORT', 5000), debug=True)
