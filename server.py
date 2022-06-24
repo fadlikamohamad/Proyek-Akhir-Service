@@ -56,11 +56,11 @@ class MainClass(Resource):
 		print("\nReceived image file name : " + filename)
 		print('Predicting.....')
 		img = Image.open(imagefile, 'r')
+		img = img.convert('RGB')
 		buf = io.BytesIO()
 		img.save(buf, format='JPEG')
 		img_byte = buf.getvalue()
 		file = base64.b64encode(img_byte)
-		img = img.convert('RGB')
 		img = img.resize((100, 100), Image.NEAREST)
 		img_array = image.img_to_array(img).astype('float32')/255
 		img_array = np.expand_dims(img_array, axis=0)
@@ -111,8 +111,8 @@ class MainClass(Resource):
 			mysql.connection.commit()
 			cursor.close()
 			
-		except Exception:
-			print('Gagal terhubung ke database')
+		except Exception as e:
+			print(str(e))
 			return jsonify("error")
 
 		response.headers.add("Access-Control-Allow-Origin", "*")
