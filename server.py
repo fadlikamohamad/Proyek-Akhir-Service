@@ -1,4 +1,4 @@
-import tensorflow as tf
+from click import echo
 import flask
 import flask.scaffold
 flask.helpers._endpoint_from_view_func = flask.scaffold._endpoint_from_view_func
@@ -8,22 +8,20 @@ from flask import Flask, request, jsonify, make_response
 from flask_restplus import Api, Resource, fields
 from tensorflow.keras import models
 import numpy as np
-import imageio
-import os
-from keras.preprocessing import image
-from flask_mysqldb import MySQL
+from tensorflow.keras.preprocessing import image
+# from flask_mysqldb import MySQL
 import base64
 from PIL import Image
 import io
 
 flask_app = flask.Flask(__name__)
 
-flask_app.config['MYSQL_HOST'] = 'localhost'
-flask_app.config['MYSQL_USER'] = 'root'
-flask_app.config['MYSQL_PASSWORD'] = ''
-flask_app.config['MYSQL_DB'] = 'proyek akhir'
+# flask_app.config['MYSQL_HOST'] = 'localhost'
+# flask_app.config['MYSQL_USER'] = 'root'
+# flask_app.config['MYSQL_PASSWORD'] = ''
+# flask_app.config['MYSQL_DB'] = 'proyek akhir'
 
-mysql = MySQL(flask_app)
+# mysql = MySQL(flask_app)
 
 app = Api(app = flask_app, 
 		  version = "1.0", 
@@ -105,17 +103,18 @@ class MainClass(Resource):
 			"result": result
 		})
 
-		try:
-			cursor = mysql.connection.cursor()
-			cursor.execute(''' INSERT INTO data_prediksi(nama_file, gambar, klasifikasi) VALUES(%s,%s,%s)''', (filename, file, class_names[np.argmax(score)]))
-			mysql.connection.commit()
-			cursor.close()
+		# try:
+		# 	cursor = mysql.connection.cursor()
+		# 	cursor.execute(''' INSERT INTO data_prediksi(nama_file, gambar, klasifikasi) VALUES(%s,%s,%s)''', (filename, file, class_names[np.argmax(score)]))
+		# 	mysql.connection.commit()
+		# 	cursor.close()
 			
-		except Exception as e:
-			print(str(e))
-			return jsonify("error")
+		# except Exception as e:
+		# 	print(str(e))
+		# 	return jsonify("error")
 
 		response.headers.add("Access-Control-Allow-Origin", "*")
 		return response
+
 if __name__ == '__main__':
-	flask_app.run(host="0.0.0.0", port=os.environ.get('PORT', 5000), debug=True)
+	flask_app.run(threaded=True, port=5000)
