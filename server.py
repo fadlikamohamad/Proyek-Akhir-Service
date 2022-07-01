@@ -27,7 +27,7 @@ loaded_model = models.load_model('18052022-experimentxxx-withbatchnorm-add.h5')
 
 @flask_app.route('/', methods=["GET"])
 def test():
-	print("Server aman")
+	return "<h1>Server aman...</h1>"
 
 @flask_app.route('/prediction/', methods=["POST"])
 def predict():
