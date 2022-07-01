@@ -9,19 +9,19 @@ from flask_restplus import Api, Resource, fields
 from tensorflow.keras import models
 import numpy as np
 from tensorflow.keras.preprocessing import image
-# from flask_mysqldb import MySQL
+from flask_mysqldb import MySQL
 import base64
 from PIL import Image
 import io
 
 flask_app = flask.Flask(__name__)
 
-# flask_app.config['MYSQL_HOST'] = 'localhost'
-# flask_app.config['MYSQL_USER'] = 'root'
-# flask_app.config['MYSQL_PASSWORD'] = ''
-# flask_app.config['MYSQL_DB'] = 'proyek akhir'
+flask_app.config['MYSQL_HOST'] = 'localhost'
+flask_app.config['MYSQL_USER'] = 'root'
+flask_app.config['MYSQL_PASSWORD'] = ''
+flask_app.config['MYSQL_DB'] = 'proyek akhir'
 
-# mysql = MySQL(flask_app)
+mysql = MySQL(flask_app)
 
 loaded_model = models.load_model('18052022-experimentxxx-withbatchnorm-add.h5')
 
@@ -89,15 +89,15 @@ def predict():
 		"result": result
 	})
 
-	# try:
-	# 	cursor = mysql.connection.cursor()
-	# 	cursor.execute(''' INSERT INTO data_prediksi(nama_file, gambar, klasifikasi) VALUES(%s,%s,%s)''', (filename, file, class_names[np.argmax(score)]))
-	# 	mysql.connection.commit()
-	# 	cursor.close()
+	try:
+		cursor = mysql.connection.cursor()
+		cursor.execute(''' INSERT INTO data_prediksi(nama_file, gambar, klasifikasi) VALUES(%s,%s,%s)''', (filename, file, class_names[np.argmax(score)]))
+		mysql.connection.commit()
+		cursor.close()
 			
-	# except Exception as e:
-	# 	print(str(e))
-	# 	return jsonify("error")
+	except Exception as e:
+		print(str(e))
+		return jsonify("error")
 
 	response.headers.add("Access-Control-Allow-Origin", "*")
 	return response
