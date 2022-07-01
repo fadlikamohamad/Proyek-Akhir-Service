@@ -25,6 +25,10 @@ flask_app = flask.Flask(__name__)
 
 loaded_model = models.load_model('18052022-experimentxxx-withbatchnorm-add.h5')
 
+@flask_app.route('/', methods=["GET"])
+def test():
+	print("Server aman")
+
 @flask_app.route('/prediction/', methods=["POST"])
 def predict():
 	response = make_response()
