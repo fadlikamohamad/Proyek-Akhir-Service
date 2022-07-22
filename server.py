@@ -53,7 +53,7 @@ def predict():
 	class_names = ['benign', 'malignant']
 	score = predictions[0]
 	print('Probability -->', class_names[0], ':', round(100 * score[0], 1),'%,', class_names[1], ':', round(100 * score[1], 1),'%')
-	predicted_label = str("Gambar ini kemungkinan besar tergolong {} (kanker) dengan probabilitas {:.1f}%."
+	predicted_label = str("Gambar ini kemungkinan besar tergolong {} dengan probabilitas {:.1f}%."
 	.format(class_names[np.argmax(score)], 100 * np.max(score)))
 	print('Predicted class :', class_names[np.argmax(score)])
 	class1 = None
